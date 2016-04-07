@@ -1,0 +1,6 @@
+{
+	"name": "achi-strasbourg/category-breadcrumb",
+	"description": "Provides DMOZ-style category breadcrumbs",
+	"type": "mediawiki-extension",
+	"license": "proprietary"
+}
