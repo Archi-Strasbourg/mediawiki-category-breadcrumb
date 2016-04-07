@@ -1,0 +1,15 @@
+{
+	"name": "Category Breadcrumb",
+	"author": "Boudewijn Vahrmeijer",
+	"url": "https://github.com/Archi-Strasbourg/mediawiki-category-breadcrumb",
+	"version": "2.4.0",
+	"description": "Provides DMOZ-style category breadcrumbs",
+	"Hooks": {
+		"SkinTemplateOutputPageBeforeExec": [
+			"CategoryBreadcrumb\\CategoryBreadcrumb::main"
+		]
+	},
+	"AutoloadClasses": {
+		"CategoryBreadcrumb\\CategoryBreadcrumb": "CategoryBreadcrumb.php"
+	}
+}
