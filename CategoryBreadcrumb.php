@@ -3,8 +3,23 @@ namespace CategoryBreadcrumb;
 
 class CategoryBreadcrumb
 {
+
+    private static function checkTree(&$tree)
+    {
+        global $wgHiddenCategories;
+        foreach ($tree as $key => &$value) {
+            if (isset($wgHiddenCategories) && in_array(preg_replace('/.+\:/', '', $key), $wgHiddenCategories)) {
+                unset($tree[$key]);
+            }
+            if (is_array($value)) {
+                self::checkTree($value);
+            }
+        }
+    }
+
     public static function main(&$sktemplate, &$tpl)
     {
+        global $wgHiddenCategories;
         $title = $sktemplate->getTitle();
 
         if ($title == null) {
@@ -13,6 +28,7 @@ class CategoryBreadcrumb
 
         // get category tree
         $parenttree = $title->getParentCategoryTree();
+        self::checkTree($parenttree);
 
         // Skin object passed by reference cause it can not be
         // accessed under the method subfunction drawCategoryBrowser
