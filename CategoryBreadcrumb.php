@@ -17,6 +17,30 @@ class CategoryBreadcrumb
         }
     }
 
+    private static function checkParentCategory(&$tree)
+    {
+        global $wgShowBreadcrumbCategories;
+        if (isset($wgShowBreadcrumbCategories)) {
+            foreach ($tree as $category => $subtree) {
+                $showCategory = false;
+                $iterator  = new \RecursiveArrayIterator($subtree);
+                $recursive = new \RecursiveIteratorIterator(
+                    $iterator,
+                    \RecursiveIteratorIterator::SELF_FIRST
+                );
+                foreach ($recursive as $key => $value) {
+                    if (in_array(preg_replace('/.+\:/', '', $key), $wgShowBreadcrumbCategories)) {
+                        $showCategory = true;
+                        break;
+                    }
+                }
+                if (!$showCategory) {
+                    unset($tree[$category]);
+                }
+            }
+        }
+    }
+
     public static function main(&$sktemplate, &$tpl)
     {
         global $wgHiddenCategories;
@@ -28,6 +52,7 @@ class CategoryBreadcrumb
 
         // get category tree
         $parenttree = $title->getParentCategoryTree();
+        self::checkParentCategory($parenttree);
         self::checkTree($parenttree);
 
         // Skin object passed by reference cause it can not be
