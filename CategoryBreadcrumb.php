@@ -41,6 +41,20 @@ class CategoryBreadcrumb
         }
     }
 
+    private static function getFlatTree($tree)
+    {
+        $flatTree = array();
+        $iterator  = new \RecursiveArrayIterator($tree);
+        $recursive = new \RecursiveIteratorIterator(
+            $iterator,
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+        foreach ($recursive as $key => $value) {
+            $flatTree[] = $key;
+        }
+        return $flatTree;
+    }
+
     public static function main(&$sktemplate, &$tpl)
     {
         global $wgHiddenCategories;
@@ -54,6 +68,7 @@ class CategoryBreadcrumb
         $parenttree = $title->getParentCategoryTree();
         self::checkParentCategory($parenttree);
         self::checkTree($parenttree);
+        $flatTree = self::getFlatTree($parenttree);
 
         // Skin object passed by reference cause it can not be
         // accessed under the method subfunction drawCategoryBrowser
@@ -70,6 +85,13 @@ class CategoryBreadcrumb
 
         $breadcrumbs = '<div id="category-bread-crumbs">';
         foreach ($tempout as $line) {
+            foreach ($flatTree as $category) {
+                $line = str_replace(
+                    ' ('.preg_replace('/.+\:/', '', $category).')',
+                    '',
+                    $line
+                );
+            }
             $breadcrumbs .= '<div>' . $line . '</div>';
         }
         $breadcrumbs .= '</div>';
