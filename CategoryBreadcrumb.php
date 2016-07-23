@@ -87,7 +87,7 @@ class CategoryBreadcrumb
         foreach ($tempout as $line) {
             foreach ($flatTree as $category) {
                 $line = str_replace(
-                    ' ('.preg_replace('/.+\:/', '', $category).')',
+                    ' ('.preg_replace('/_\(.+\)/', '', preg_replace('/.+\:/', '', $category)).')',
                     '',
                     $line
                 );
