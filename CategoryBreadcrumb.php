@@ -44,9 +44,8 @@ class CategoryBreadcrumb
     private static function getFlatTree($tree)
     {
         $flatTree = [];
-        $iterator = new \RecursiveArrayIterator($tree);
         $recursive = new \RecursiveIteratorIterator(
-            $iterator,
+            new \RecursiveArrayIterator($tree),
             \RecursiveIteratorIterator::SELF_FIRST
         );
         foreach ($recursive as $key => $value) {
