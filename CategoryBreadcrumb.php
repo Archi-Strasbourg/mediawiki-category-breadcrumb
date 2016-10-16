@@ -1,9 +1,9 @@
 <?php
+
 namespace CategoryBreadcrumb;
 
 class CategoryBreadcrumb
 {
-
     private static function checkTree(&$tree)
     {
         global $wgHiddenCategories;
@@ -23,7 +23,7 @@ class CategoryBreadcrumb
         if (isset($wgShowBreadcrumbCategories)) {
             foreach ($tree as $category => $subtree) {
                 $showCategory = false;
-                $iterator  = new \RecursiveArrayIterator($subtree);
+                $iterator = new \RecursiveArrayIterator($subtree);
                 $recursive = new \RecursiveIteratorIterator(
                     $iterator,
                     \RecursiveIteratorIterator::SELF_FIRST
@@ -43,8 +43,8 @@ class CategoryBreadcrumb
 
     private static function getFlatTree($tree)
     {
-        $flatTree = array();
-        $iterator  = new \RecursiveArrayIterator($tree);
+        $flatTree = [];
+        $iterator = new \RecursiveArrayIterator($tree);
         $recursive = new \RecursiveIteratorIterator(
             $iterator,
             \RecursiveIteratorIterator::SELF_FIRST
@@ -52,6 +52,7 @@ class CategoryBreadcrumb
         foreach ($recursive as $key => $value) {
             $flatTree[] = $key;
         }
+
         return $flatTree;
     }
 
@@ -92,12 +93,12 @@ class CategoryBreadcrumb
                     $line
                 );
             }
-            $breadcrumbs .= '<div>' . $line . '</div>';
+            $breadcrumbs .= '<div>'.$line.'</div>';
         }
         $breadcrumbs .= '</div>';
 
         // append to the existing subtitle text;
-        $tpl->set('subtitle', $tpl->data['subtitle'] . $breadcrumbs);
+        $tpl->set('subtitle', $tpl->data['subtitle'].$breadcrumbs);
 
         return true;
     }
