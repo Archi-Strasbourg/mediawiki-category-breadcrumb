@@ -92,7 +92,7 @@ class CategoryBreadcrumb
                     '',
                     $line
                 );
-                if (preg_replace('/_\(.*\)/', '', $shortCat) == 'Autre') {
+                if (count($flatTree) == 5 && preg_replace('/_\(.*\)/', '', $shortCat) == 'Autre') {
                     $escapedShortCat = str_replace('_', ' ', $shortCat);
                     $line = str_replace('>'.$escapedShortCat, ' style="display:none;">'.$escapedShortCat, $line);
                     $line = str_replace($escapedShortCat.'</a> &gt;', $escapedShortCat.'</a>', $line);
