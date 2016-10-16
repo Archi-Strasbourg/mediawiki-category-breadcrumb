@@ -86,11 +86,17 @@ class CategoryBreadcrumb
         $breadcrumbs = '<div id="category-bread-crumbs">';
         foreach ($tempout as $line) {
             foreach ($flatTree as $category) {
+                $shortCat = preg_replace('/.+\:/', '', $category);
                 $line = str_replace(
-                    ' ('.preg_replace('/_\(.+\)/', '', preg_replace('/.+\:/', '', $category)).')',
+                    ' ('.preg_replace('/_\(.+\)/', '', $shortCat).')',
                     '',
                     $line
                 );
+                if (preg_replace('/_\(.*\)/', '', $shortCat) == 'Autre') {
+                    $escapedShortCat = str_replace('_', ' ', $shortCat);
+                    $line = str_replace('>'.$escapedShortCat, ' style="display:none;">'.$escapedShortCat, $line);
+                    $line = str_replace($escapedShortCat.'</a> &gt;', $escapedShortCat.'</a>', $line);
+                }
             }
             $breadcrumbs .= '<div>'.$line.'</div>';
         }
