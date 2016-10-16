@@ -95,7 +95,7 @@ class CategoryBreadcrumb
                 if (preg_replace('/_\(.*\)/', '', $shortCat) == 'Autre') {
                     $escapedShortCat = str_replace('_', ' ', $shortCat);
                     $line = str_replace('>'.$escapedShortCat, ' style="display:none;">'.$escapedShortCat, $line);
-                    $line = str_replace($escapedShortCat.'</a> &gt;', $escapedShortCat.'</a>', $line);
+                    $line = str_replace($escapedShortCat.'</a> &gt;', $escapedShortCat.'</a> <span style="display:none;">&gt;</span>', $line);
                 }
             }
             $breadcrumbs .= '<div>'.$line.'</div>';
