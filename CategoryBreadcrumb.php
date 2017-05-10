@@ -4,7 +4,7 @@ namespace CategoryBreadcrumb;
 
 class CategoryBreadcrumb
 {
-    private static function checkTree(&$tree)
+    public static function checkTree(&$tree)
     {
         global $wgHiddenCategories;
         foreach ($tree as $key => &$value) {
@@ -17,7 +17,7 @@ class CategoryBreadcrumb
         }
     }
 
-    private static function checkParentCategory(&$tree)
+    public static function checkParentCategory(&$tree)
     {
         global $wgShowBreadcrumbCategories;
         if (isset($wgShowBreadcrumbCategories)) {
@@ -41,7 +41,7 @@ class CategoryBreadcrumb
         }
     }
 
-    private static function getFlatTree($tree)
+    public static function getFlatTree($tree)
     {
         $flatTree = [];
         $recursive = new \RecursiveIteratorIterator(
