@@ -1,10 +1,63 @@
 <?php
+
 namespace CategoryBreadcrumb;
 
 class CategoryBreadcrumb
 {
+    public static function checkTree(&$tree)
+    {
+        global $wgHiddenCategories;
+        foreach ($tree as $key => &$value) {
+            if (isset($wgHiddenCategories) && in_array(preg_replace('/.+\:/', '', $key), $wgHiddenCategories)) {
+                unset($tree[$key]);
+            }
+            if (is_array($value)) {
+                self::checkTree($value);
+            }
+        }
+    }
+
+    public static function checkParentCategory(&$tree)
+    {
+        global $wgShowBreadcrumbCategories;
+        if (isset($wgShowBreadcrumbCategories)) {
+            foreach ($tree as $category => $subtree) {
+                $showCategory = false;
+                $iterator = new \RecursiveArrayIterator($subtree);
+                $recursive = new \RecursiveIteratorIterator(
+                    $iterator,
+                    \RecursiveIteratorIterator::SELF_FIRST
+                );
+                foreach ($recursive as $key => $value) {
+                    if (in_array(preg_replace('/.+\:/', '', $key), $wgShowBreadcrumbCategories)) {
+                        $showCategory = true;
+                        break;
+                    }
+                }
+                if (!$showCategory) {
+                    unset($tree[$category]);
+                }
+            }
+        }
+    }
+
+    public static function getFlatTree($tree)
+    {
+        $flatTree = [];
+        $recursive = new \RecursiveIteratorIterator(
+            new \RecursiveArrayIterator($tree),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+        foreach ($recursive as $key => $value) {
+            $flatTree[] = $key;
+        }
+
+        return $flatTree;
+    }
+
     public static function main(&$sktemplate, &$tpl)
     {
+        global $wgHiddenCategories;
         $title = $sktemplate->getTitle();
 
         if ($title == null) {
@@ -13,6 +66,9 @@ class CategoryBreadcrumb
 
         // get category tree
         $parenttree = $title->getParentCategoryTree();
+        self::checkParentCategory($parenttree);
+        self::checkTree($parenttree);
+        $flatTree = self::getFlatTree($parenttree);
 
         // Skin object passed by reference cause it can not be
         // accessed under the method subfunction drawCategoryBrowser
@@ -29,12 +85,25 @@ class CategoryBreadcrumb
 
         $breadcrumbs = '<div id="category-bread-crumbs">';
         foreach ($tempout as $line) {
-            $breadcrumbs .= '<div>' . $line . '</div>';
+            foreach ($flatTree as $category) {
+                $shortCat = preg_replace('/.+\:/', '', $category);
+                $line = str_replace(
+                    ' ('.preg_replace('/_\(.+\)/', '', $shortCat).')',
+                    '',
+                    $line
+                );
+                if (count($flatTree) == 5 && preg_replace('/_\(.*\)/', '', $shortCat) == 'Autre') {
+                    $escapedShortCat = str_replace('_', ' ', $shortCat);
+                    $line = str_replace('>'.$escapedShortCat, ' style="display:none;">'.$escapedShortCat, $line);
+                    $line = str_replace($escapedShortCat.'</a> &gt;', $escapedShortCat.'</a> <span style="display:none;">&gt;</span>', $line);
+                }
+            }
+            $breadcrumbs .= '<div>'.$line.'</div>';
         }
         $breadcrumbs .= '</div>';
 
         // append to the existing subtitle text;
-        $tpl->set('subtitle', $tpl->data['subtitle'] . $breadcrumbs);
+        $tpl->set('subtitle', $tpl->data['subtitle'].$breadcrumbs);
 
         return true;
     }
