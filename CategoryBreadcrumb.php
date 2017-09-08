@@ -17,6 +17,37 @@ class CategoryBreadcrumb
         }
     }
 
+    public static function getDuplicates(&$tree)
+    {
+        $catList = [];
+        $duplicates = [];
+        foreach ($tree as $category => $subtree) {
+            $iterator = new \RecursiveArrayIterator($subtree);
+            $recursive = new \RecursiveIteratorIterator(
+                $iterator,
+                \RecursiveIteratorIterator::SELF_FIRST
+            );
+            foreach ($recursive as $key => $value) {
+                $catList[$category][] = $key;
+            }
+
+        }
+        $movedCats = [];
+        foreach ($catList as $category => $flatTree) {
+            foreach ($catList as $otherCategory => $otherFlatTree) {
+                if (!in_array($category, $movedCats) && $category != $otherCategory) {
+                    if ($flatTree == $otherFlatTree) {
+                        $duplicates[$category][] = $otherCategory;
+                        $movedCats[] = $otherCategory;
+                        unset($tree[$otherCategory]);
+                    }
+                }
+            }
+        }
+
+        return $duplicates;
+    }
+
     public static function checkParentCategory(&$tree)
     {
         global $wgShowBreadcrumbCategories;
@@ -68,6 +99,7 @@ class CategoryBreadcrumb
         $parenttree = $title->getParentCategoryTree();
         self::checkParentCategory($parenttree);
         self::checkTree($parenttree);
+        $duplicates = self::getDuplicates($parenttree);
         $flatTree = self::getFlatTree($parenttree);
 
         // Skin object passed by reference cause it can not be
@@ -84,7 +116,22 @@ class CategoryBreadcrumb
         asort($tempout);
 
         $breadcrumbs = '<div id="category-bread-crumbs">';
-        foreach ($tempout as $line) {
+        foreach ($tempout as $i => $line) {
+            $curCat = array_keys($parenttree)[$i - 1];
+            if (isset($duplicates[$curCat])) {
+                foreach ($duplicates[$curCat] as $duplicate) {
+                    $eltitle = \Title::newFromText($duplicate);
+                    $line .= '|'.\Linker::link($eltitle, htmlspecialchars($eltitle->getText()));
+                }
+            }
+            foreach ($flatTree as $category) {
+                $shortCat = preg_replace('/.+\:/', '', $category);
+                if (count($flatTree) >= 5 && preg_replace('/_\(.*\)/', '', $shortCat) == 'Autre') {
+                    $escapedShortCat = str_replace('_', ' ', $shortCat);
+                    $line = str_replace('>'.$escapedShortCat, ' style="display:none;">'.$escapedShortCat, $line);
+                    $line = str_replace($escapedShortCat.'</a> &gt;', $escapedShortCat.'</a> <span style="display:none;">&gt;</span>', $line);
+                }
+            }
             foreach ($flatTree as $category) {
                 $shortCat = preg_replace('/.+\:/', '', $category);
                 $line = str_replace(
@@ -92,11 +139,6 @@ class CategoryBreadcrumb
                     '',
                     $line
                 );
-                if (count($flatTree) >= 5 && preg_replace('/_\(.*\)/', '', $shortCat) == 'Autre') {
-                    $escapedShortCat = str_replace('_', ' ', $shortCat);
-                    $line = str_replace('>'.$escapedShortCat, ' style="display:none;">'.$escapedShortCat, $line);
-                    $line = str_replace($escapedShortCat.'</a> &gt;', $escapedShortCat.'</a> <span style="display:none;">&gt;</span>', $line);
-                }
             }
             $breadcrumbs .= '<div>'.$line.'</div>';
         }
