@@ -30,7 +30,6 @@ class CategoryBreadcrumb
             foreach ($recursive as $key => $value) {
                 $catList[$category][] = $key;
             }
-
         }
         $movedCats = [];
         foreach ($catList as $category => $flatTree) {
