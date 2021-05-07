@@ -2,6 +2,10 @@
 
 namespace CategoryBreadcrumb;
 
+use MediaWiki\MediaWikiServices;
+use Skin;
+use Title;
+
 class CategoryBreadcrumb
 {
     public static function checkTree(&$tree)
@@ -85,7 +89,40 @@ class CategoryBreadcrumb
         return $flatTree;
     }
 
-    public static function main(&$sktemplate, &$tpl)
+    /**
+     * Duplicated method because it is protected.
+     *
+     * @param Skin $sktemplate
+     * @param array $tree
+     * @return string
+     *
+     * @see Skin::drawCategoryBrowser()
+     */
+    protected static function drawCategoryBrowser(Skin $sktemplate, array $tree): string
+    {
+        $return = '';
+        $linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
+
+        foreach ($tree as $element => $parent) {
+            if (empty($parent)) {
+                $return .= "\n";
+            } else {
+                $return .= self::drawCategoryBrowser($sktemplate, $parent) . ' &gt; ';
+            }
+
+            $eltitle = Title::newFromText($element);
+            $return .= $linkRenderer->makeLink($eltitle, $eltitle->getText());
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param Skin $sktemplate
+     * @param $tpl
+     * @return bool
+     */
+    public static function main(Skin &$sktemplate, &$tpl): bool
     {
         global $wgHiddenCategories;
         $title = $sktemplate->getTitle();
@@ -103,7 +140,7 @@ class CategoryBreadcrumb
 
         // Skin object passed by reference cause it can not be
         // accessed under the method subfunction drawCategoryBrowser
-        $tempout = explode("\n", $sktemplate->drawCategoryBrowser($parenttree));
+        $tempout = explode("\n", self::drawCategoryBrowser($sktemplate, $parenttree));
 
         // Clean out bogus first entry
         unset($tempout[0]);
@@ -119,7 +156,7 @@ class CategoryBreadcrumb
             $curCat = array_keys($parenttree)[$i - 1];
             if (isset($duplicates[$curCat])) {
                 foreach ($duplicates[$curCat] as $duplicate) {
-                    $eltitle = \Title::newFromText($duplicate);
+                    $eltitle = Title::newFromText($duplicate);
                     $line .= '|'.\Linker::link($eltitle, htmlspecialchars($eltitle->getText()));
                 }
             }
