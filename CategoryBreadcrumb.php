@@ -2,6 +2,7 @@
 
 namespace CategoryBreadcrumb;
 
+use Linker;
 use MediaWiki\MediaWikiServices;
 use Skin;
 use Title;
@@ -153,11 +154,14 @@ class CategoryBreadcrumb
 
         $breadcrumbs = '<div id="category-bread-crumbs">';
         foreach ($tempout as $i => $line) {
-            $curCat = array_keys($parenttree)[$i - 1];
-            if (isset($duplicates[$curCat])) {
-                foreach ($duplicates[$curCat] as $duplicate) {
-                    $eltitle = Title::newFromText($duplicate);
-                    $line .= '|'.\Linker::link($eltitle, htmlspecialchars($eltitle->getText()));
+            $catKeys = array_keys($parenttree);
+            if (isset($catKeys[$i - 1])) {
+                $curCat = array_keys($parenttree)[$i - 1];
+                if (isset($duplicates[$curCat])) {
+                    foreach ($duplicates[$curCat] as $duplicate) {
+                        $eltitle = Title::newFromText($duplicate);
+                        $line .= '|' . Linker::link($eltitle, htmlspecialchars($eltitle->getText()));
+                    }
                 }
             }
             foreach ($flatTree as $category) {
