@@ -123,7 +123,7 @@ class CategoryBreadcrumb
      * @param $tpl
      * @return bool
      */
-    public static function main(Skin &$sktemplate, &$tpl): bool
+    public static function main(Skin $sktemplate, $tpl): bool
     {
         global $wgHiddenCategories;
         $title = $sktemplate->getTitle();
