@@ -9,10 +9,17 @@ use Title;
 
 class CategoryBreadcrumb
 {
-    public static function checkTree(&$tree)
-    {
+    public static function checkTree(&$tree): void {
         global $wgHiddenCategories;
+        $services = MediaWikiServices::getInstance();
+        $titleFactory = $services->getTitleFactory();
+        $pageProps = $services->getPageProps();
+
         foreach ($tree as $key => &$value) {
+            if (!empty($pageProps->getProperties($titleFactory->newFromText($key), 'hiddencat'))) {
+                unset($tree[$key]);
+            }
+
             if (isset($wgHiddenCategories) && in_array(preg_replace('/.+\:/', '', $key), $wgHiddenCategories)) {
                 unset($tree[$key]);
             }
